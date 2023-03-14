@@ -89,3 +89,46 @@ app.post('/webhook', (req, res) => {
 // Helper function to send text messages to users
 function sendTextMessage(recipientId, messageText) {
   // Set up the message
+
+
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+const port = 3000;
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+// Define routes
+app.get('/', (req, res) => {
+  res.send('Welcome to our automobile e-commerce chat bot!');
+});
+
+app.post('/api/messages', (req, res) => {
+  // Handle incoming message from user
+  const message = req.body.message;
+
+  // Analyze user's message and generate response
+  let response = '';
+  if (message.toLowerCase().includes('car')) {
+    response = 'We have a wide selection of cars available for purchase. Which make and model are you interested in?';
+  } else if (message.toLowerCase().includes('truck')) {
+    response = 'We also have a selection of trucks available for purchase. Which make and model are you interested in?';
+  } else if (message.toLowerCase().includes('suv')) {
+    response = 'Our SUVs are a popular choice among families. Which make and model are you interested in?';
+  } else if (message.toLowerCase().includes('discount')) {
+    response = 'We currently have a 10% discount on all cars purchased online. Would you like to browse our selection?';
+  } else {
+    response = 'I\'m sorry, I didn\'t understand. Can you please rephrase your message?';
+  }
+
+  // Send response back to user
+  res.json({
+    message: response
+  });
+});
+
+// Start server
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
