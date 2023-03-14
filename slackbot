@@ -1,0 +1,55 @@
+const { WebClient } = require('@slack/web-api');
+const { createEventAdapter } = require('@slack/events-api');
+const { RTMClient } = require('@slack/rtm-api');
+
+// Initialize a Slack bot with your API token and signing secret
+const web = new WebClient(process.env.SLACK_API_TOKEN);
+const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET);
+const rtm = new RTMClient(process.env.SLACK_API_TOKEN);
+
+// Start the server to listen for events from Slack
+const PORT = process.env.PORT || 3000;
+slackEvents.start(PORT).then(() => {
+  console.log(`Listening for events on port ${PORT}`);
+});
+
+// Handle incoming messages
+slackEvents.on('message', async (event) => {
+  try {
+    if (!event.bot_id) {
+      const response = await handleMessage(event.text);
+      if (response) {
+        await web.chat.postMessage({
+          channel: event.channel,
+          text: response,
+        });
+      }
+    }
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+// Handle DMs to the bot
+rtm.on('message', async (event) => {
+  try {
+    if (event.type === 'message' && event.channel.startsWith('D')) {
+      const response = await handleMessage(event.text, event.user);
+      if (response) {
+        await rtm.sendMessage(response, event.channel);
+      }
+    }
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+// Function to handle incoming messages and return a response
+async function handleMessage(message, userId) {
+  // Implement your logic for handling messages here
+  // For example, you could use a Natural Language Processing library to understand the user's intent and respond accordingly
+  // You could also query a database or API to retrieve information based on the user's request
+
+  // Return a response message to send back to the user
+  return 'Hello, I am the EcoComerce automobile chat bot. How can I assist you?';
+}

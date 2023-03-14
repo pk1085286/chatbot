@@ -1,0 +1,91 @@
+// Import required libraries and modules
+const express = require('express');
+const bodyParser = require('body-parser');
+const request = require('request');
+
+// Initialize the app
+const app = express();
+
+// Set up body-parser middleware
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+// Set up a default route to test the server
+app.get('/', (req, res) => {
+  res.send('Welcome to the automobile e-commerce chatbot!');
+});
+
+// Set up a route to handle incoming messages from users
+app.post('/webhook', (req, res) => {
+  let message = req.body.message;
+
+  // Check if the message is not null
+  if (message) {
+    let text = message.text.toLowerCase();
+
+    // Check if the message is a greeting
+    if (text.includes('hi') || text.includes('hello')) {
+      sendTextMessage(message.sender, 'Hello! How can I help you today?');
+    }
+
+    // Check if the message is a query about a car model
+    else if (text.includes('car') && text.includes('model')) {
+      // Extract the car model from the message
+      let carModel = text.replace(/[^a-zA-Z ]/g, '').trim();
+
+      // Look up the car details from the database or API
+      let carDetails = getCarDetails(carModel);
+
+      // Send the car details to the user
+      sendTextMessage(message.sender, carDetails);
+    }
+
+    // Check if the message is a query about the price of a car
+    else if (text.includes('car') && text.includes('price')) {
+      // Extract the car model from the message
+      let carModel = text.replace(/[^a-zA-Z ]/g, '').trim();
+
+      // Look up the car price from the database or API
+      let carPrice = getCarPrice(carModel);
+
+      // Send the car price to the user
+      sendTextMessage(message.sender, `The price of ${carModel} is ${carPrice}.`);
+    }
+
+    // Check if the message is a query about a car feature
+    else if (text.includes('car') && text.includes('feature')) {
+      // Extract the car model from the message
+      let carModel = text.replace(/[^a-zA-Z ]/g, '').trim();
+
+      // Look up the car features from the database or API
+      let carFeatures = getCarFeatures(carModel);
+
+      // Send the car features to the user
+      sendTextMessage(message.sender, `The features of ${carModel} are ${carFeatures}.`);
+    }
+
+    // Check if the message is a query about a dealership location
+    else if (text.includes('dealership') && text.includes('location')) {
+      // Extract the dealership location from the message
+      let location = text.replace(/[^a-zA-Z ]/g, '').trim();
+
+      // Look up the dealership details from the database or API
+      let dealershipDetails = getDealershipDetails(location);
+
+      // Send the dealership details to the user
+      sendTextMessage(message.sender, dealershipDetails);
+    }
+
+    // If the message is not recognized, send a default response
+    else {
+      sendTextMessage(message.sender, 'I\'m sorry, I don\'t understand. Can you please rephrase your question?');
+    }
+  }
+
+  // Send a 200 OK response to acknowledge receipt of the message
+  res.status(200).send('OK');
+});
+
+// Helper function to send text messages to users
+function sendTextMessage(recipientId, messageText) {
+  // Set up the message
